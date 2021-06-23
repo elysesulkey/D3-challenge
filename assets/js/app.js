@@ -1,12 +1,12 @@
 // Set up chart
-var svgWidth = 900;
-var svgHeight = 560;
+var svgWidth = 950;
+var svgHeight = 625;
 
 var margin = {
   top: 20,
   right: 40,
   bottom: 80,
-  left: 50
+  left: 125
 };
 
 var width = svgWidth - margin.left - margin.right;
