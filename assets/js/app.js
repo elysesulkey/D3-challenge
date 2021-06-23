@@ -1,12 +1,12 @@
 // Set up our chart
 // ================================
-var svgWidth = 960;
-var svgHeight = 500;
+var svgWidth = 800;
+var svgHeight = 560;
 
 var margin = {
   top: 20,
-  right: 50,
-  bottom: 60,
+  right: 40,
+  bottom: 80,
   left: 50
 };
 
