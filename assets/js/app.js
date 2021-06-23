@@ -12,8 +12,8 @@ var margin = {
 var width = svgWidth - margin.left - margin.right;
 var height = svgHeight - margin.top - margin.bottom;
 
-// Create an SVG wrapper, append an SVG group that will hold our chart, and shift the latter by left and top margins.
-var svg = d3.select("#scatter") // insert chart to tag id "scatter"
+// Create an SVG wrapper, append SVG group to hold chart & shift left and top margins.
+var svg = d3.select("#scatter")
   .append("svg")
   .attr("width", svgWidth)
   .attr("height", svgHeight);
@@ -23,104 +23,96 @@ var chartGroup = svg.append("g")
   .attr("width", width)
   .attr("transform", `translate(${margin.left}, ${margin.top})`);
     
+// Initial paramaters
+var x_property = "poverty";
+var y_property = "obesity";
 
-// initial params
-var xProperty = "poverty";
-var yProperty = "obesity";
-
-  // updating x-scale 
-function xScale(data, xProperty) {
-  // create scales
+  // Update x-scale & create scales
+function xScale(data, x_property) {
   var xLinearScale = d3.scaleLinear()
-    .domain([d3.min(data, d => d[xProperty]) * 0.8,
-    d3.max(data, d => d[xProperty]) * 1.2
+    .domain([d3.min(data, d => d[x_property]) * 0.8,
+    d3.max(data, d => d[x_property]) * 1.2
     ])
     .range([0, width]);
-
   return xLinearScale;
 }
 
-// function used for updating x-scale var upon click on axis label
-function yScale(data, yProperty) {
-  // create scales
+// Create function to update x-scale when clicking axis label & create scales
+function yScale(data, y_property) {
   var yLinearScale = d3.scaleLinear()
-    .domain([d3.min(data, d => d[yProperty]) * 0.8,
-    d3.max(data, d => d[yProperty]) * 1.1
+    .domain([d3.min(data, d => d[y_property]) * 0.8,
+    d3.max(data, d => d[y_property]) * 1.1
     ])
     .range([height, 0]);
-
   return yLinearScale;
 }
 
-// for updating xAxis var upon click on X axis label
+// Create function to update xAxis when clicking axis label
 function renderXAxis(newXScale, xAxis) {
   var bottomAxis = d3.axisBottom(newXScale);
-
   xAxis.transition()
     .duration(1000)
     .call(bottomAxis);
-
   return xAxis;
 }
-  // for updating xAxis var upon click on Y axis label
+  // Create function to update xAxis when clicking Y axis label
 function renderyAxis(newYScale, yAxis) {
   var leftAxis = d3.axisLeft(newYScale); 
   yAxis.transition()
     .duration(500)
     .call(leftAxis);
-
   return yAxis;
 }
-// function for updating circles group
-function renderCircles(circlesGroup, newXScale, xProperty, newYScale, yProperty) {
+// Create function to update circles
+function renderCircles(circlesGroup, newXScale, x_property, newYScale, y_property) {
   circlesGroup.transition()
     .duration(1000)
-    .attr("cx", d => newXScale(d[xProperty]))
-    .attr("cy", d => newYScale(d[yProperty]));
+    .attr("cx", d => newXScale(d[x_property]))
+    .attr("cy", d => newYScale(d[y_property]));
   return circlesGroup;
 }
-//circleText
-function renderText(circleText, newXScale, xProperty, newYScale, yProperty) {
+
+function renderText(circleText, newXScale, x_property, newYScale, y_property) {
   circleText.transition()
     .duration(1000)
-    .attr("x", d => newXScale(d[xProperty]))
-    .attr("y", d => newYScale(d[yProperty]));
+    .attr("x", d => newXScale(d[x_property]))
+    .attr("y", d => newYScale(d[y_property]));
   return circleText;
 }
-// function used for updating circles group with new tooltip
-function updateToolTip(xProperty,yProperty, circlesGroup) {
-  console.log("update tool tip", xProperty);
+
+function updateToolTip(x_property,y_property, circlesGroup) {
+  console.log("update tool tip", x_property);
   var label;
  
-  // set x and y axis label on tooltip based on selection
-  if (xProperty === "poverty") {
+  // Set x & y axis label on tooltip 
+  if (x_property === "poverty") {
     label = "Poverty:";
   }
-  else if (xProperty === "age") {
+  else if (x_property === "age") {
     label = "Age:";
   }
   else {
     label = "Household Income:";
   }
  
-  if (yProperty === "obesity") {
+  if (y_property === "obesity") {
     ylabel = "Obesity:";
   }
-  else if (yProperty === "smokes") {
+  else if (y_property === "smokes") {
     ylabel = "Smokes:";
   }
   else {
-    ylabel = "Lack Healthcare:";
+    ylabel = "Healthcare:";
   }
   var toolTip = d3.tip()
     .attr("class", "d3-tip")
     .offset([80, -60])
     .html(function (d) {
-          if (xProperty === "poverty") {
-            return (`${d.state}<br>${label} ${d[xProperty]}%<br>${ylabel} ${d[yProperty]}%`); 
+          if (x_property === "poverty") {
+            return (`${d.state}<br>${label} ${d[x_property]}%<br>${ylabel} ${d[y_property]}%`); 
           }
           else
-          return (`${d.state}<br>${label} ${d[xProperty]}<br>${ylabel} ${d[yProperty]}%`);
+          return (`${d.state}<br>${label} ${d[x_property]}<br>${ylabel} ${d[y_property]}%`);
     });
    
   //function chosen x and y tooltip
@@ -136,11 +128,8 @@ function updateToolTip(xProperty,yProperty, circlesGroup) {
   return circlesGroup;
 }
 
-
   // Import Data
   d3.csv("assets/data/data.csv").then(function (data) {
-
-  // parse data/cast as numbers
   data.forEach(d => {
     d.poverty = +d.poverty;
     d.healthcare = +d.healthcare;
@@ -150,17 +139,15 @@ function updateToolTip(xProperty,yProperty, circlesGroup) {
     d.smokes = +d.smokes
 });
 
-  // xLinearScale function 
-  var xLinearScale = xScale(data, xProperty);
-
-
-  var yLinearScale = yScale(data, yProperty);
+  // LinearScale functions 
+  var xLinearScale = xScale(data, x_property);
+  var yLinearScale = yScale(data, y_property);
  
   // Create bottom(x) and left(y) axis functions
   var bottomAxis = d3.axisBottom(xLinearScale);
   var leftAxis = d3.axisLeft(yLinearScale);
 
-  // append axes to chart
+  // Append axes
   var xAxis = chartGroup.append("g")
     .attr("transform", `translate(0, ${height})`)
     .call(bottomAxis);
@@ -168,29 +155,27 @@ function updateToolTip(xProperty,yProperty, circlesGroup) {
   chartGroup.append("g")
     .call(leftAxis); 
 
-  // create Circles
+  // Create circles
   var circlesGroup = chartGroup.selectAll("circle")
     .data(data)
     .enter()
     .append("circle")
-    .attr("cx", d => xLinearScale(d[xProperty])) 
-    .attr("cy", d => yLinearScale(d[yProperty])) 
+    .attr("cx", d => xLinearScale(d[x_property])) 
+    .attr("cy", d => yLinearScale(d[y_property])) 
     .attr("r", "15") 
     .attr("class", "stateCircle") 
     .attr("opacity", ".7");
-
 
   // Create group for two x-axis labels
   var labelsGroup = chartGroup.append("g")
     .attr("transform", `translate(${width / 2}, ${height + 20})`);
 
- 
   var povertyLabel = labelsGroup.append("text")
     .attr("x", 0)
     .attr("y", 15)
     .attr("value", "poverty")
     .classed("active", true)
-    .text("In Poverty %");
+    .text("Poverty %");
 
   var incomeLabel = labelsGroup.append("text")
     .attr("x", 0)
@@ -206,7 +191,6 @@ function updateToolTip(xProperty,yProperty, circlesGroup) {
     .classed("inactive", true)
     .text("Age (Median)");  
 
- 
   var obesityLabel = labelsGroup.append("text")
     .attr("transform","rotate(-90)")
     .attr("x", (margin.left) * 2.5)
@@ -229,23 +213,21 @@ function updateToolTip(xProperty,yProperty, circlesGroup) {
     .attr("y", 0 - (height -20))
     .attr("value", "healthcare") 
     .classed("inactive", true)
-    .text("Lacks Healthcare (%)");  
+    .text("Healthcare (%)");  
 
-
-  //  add text to Circle
+  //  Add text to circle
   var circleText = chartGroup.selectAll()
     .data(data)
     .enter()
     .append("text")
     .text(d => d.abbr)
-    .attr("x", d => xLinearScale(d[xProperty])) 
-    .attr("y", d => yLinearScale(d[yProperty])) 
+    .attr("x", d => xLinearScale(d[x_property])) 
+    .attr("y", d => yLinearScale(d[y_property])) 
     .attr("class", "stateText") 
     .attr("font-size", "9");
 
-
   // updateToolTip function above csv import
-  var circlesGroup = updateToolTip(xProperty, yProperty,circlesGroup);
+  var circlesGroup = updateToolTip(x_property, y_property,circlesGroup);
 
   // x axis labels event listener
   labelsGroup.selectAll("text")
@@ -256,17 +238,16 @@ function updateToolTip(xProperty,yProperty, circlesGroup) {
      if(true){   
       if (value == "poverty" || value=="income" || value=="age") { 
         console.log(value)
-        // replaces xProperty with value
-        xProperty = value;
+        // replaces x_property with value
+        x_property = value;
       
-        xLinearScale = xScale(data, xProperty);
+        xLinearScale = xScale(data, x_property);
 
         // updates x axis with transition
         xAxis = renderXAxis(xLinearScale, xAxis);
 
-             
         // changes classes to change bold text
-        if (xProperty === "income") {
+        if (x_property === "income") {
           incomeLabel
             .classed("active", true)
             .classed("inactive", false);
@@ -277,7 +258,7 @@ function updateToolTip(xProperty,yProperty, circlesGroup) {
             .classed("active", false)
             .classed("inactive", true); 
         }
-        else if(xProperty == "age"){
+        else if(x_property == "age"){
           ageLabel
           .classed("active", true)
           .classed("inactive", false);  
@@ -299,17 +280,13 @@ function updateToolTip(xProperty,yProperty, circlesGroup) {
             .classed("active", false)
             .classed("inactive", true); 
        }
-
       } 
       else
-            
-        // replaces hProperty with value
-        yProperty = value;
-        yLinearScale = yScale(data, yProperty);
-       
-              
+        // replaces y_property with value
+        y_property = value;
+        yLinearScale = yScale(data, y_property);  
         // changes classes to change bold text
-        if (yProperty === "obesity") {
+        if (y_property === "obesity") {
           obesityLabel
             .classed("active", true)
             .classed("inactive", false);
@@ -320,7 +297,7 @@ function updateToolTip(xProperty,yProperty, circlesGroup) {
             .classed("active", false)
             .classed("inactive", true); 
         }
-        else if(yProperty == "healthcare"){
+        else if(y_property == "healthcare"){
           healthcareLabel
           .classed("active", true)
           .classed("inactive", false);  
@@ -330,7 +307,6 @@ function updateToolTip(xProperty,yProperty, circlesGroup) {
           smokesLabel
           .classed("active", false)
           .classed("inactive", true);
-
         }
         else {
           smokesLabel
@@ -345,17 +321,14 @@ function updateToolTip(xProperty,yProperty, circlesGroup) {
        }
     
        // updates circles with new x values
-       circlesGroup = renderCircles(circlesGroup, xLinearScale, xProperty, yLinearScale, yProperty);
-      //  update circle text
-       circleText = renderText(circleText, xLinearScale, xProperty, yLinearScale, yProperty); 
-
+       circlesGroup = renderCircles(circlesGroup, xLinearScale, x_property, yLinearScale, y_property);
+      // update circle text
+       circleText = renderText(circleText, xLinearScale, x_property, yLinearScale, y_property); 
        // updates tooltips with new info
-       circlesGroup = updateToolTip(xProperty, yProperty, circlesGroup);
+       circlesGroup = updateToolTip(x_property, y_property, circlesGroup);
 
     } 
-  
   }); 
-
 }).catch(function (error) {
   console.log(error);
 });
