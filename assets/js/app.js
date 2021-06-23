@@ -329,6 +329,6 @@ function updateToolTip(x_property,y_property, circlesGroup) {
 
     } 
   }); 
-}).catch(function (error) {
-  console.log(error);
-});
+//}).catch(function (error) {
+  //console.log(error);
+//});
