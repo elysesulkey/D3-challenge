@@ -2,6 +2,7 @@
   font-family: sans-serif;
   font-size: 16px;
   text-anchor: middle;
+  text-align: center;
 }
 
 .active {
@@ -9,6 +10,7 @@
   fill: #000;
   transition: fill 0.3s ease-out;
   text-anchor: middle;
+  text-align: center;
 }
 
 .inactive {
