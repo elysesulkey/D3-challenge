@@ -1,5 +1,4 @@
-// Set up our chart
-// ================================
+// Set up chart
 var svgWidth = 800;
 var svgHeight = 560;
 
@@ -13,9 +12,7 @@ var margin = {
 var width = svgWidth - margin.left - margin.right;
 var height = svgHeight - margin.top - margin.bottom;
 
-// Create an SVG wrapper,
-// append an SVG group that will hold our chart,
-// =================================
+// Create SVG wrapper & append SVG group to hold chart
 var svg = d3.select("#scatter")
   .append("svg")
   .attr("width", svgWidth)
@@ -24,14 +21,62 @@ var svg = d3.select("#scatter")
 var chartGroup = svg.append("g")
   .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-// Import data from the data.csv file
-// =================================
-d3.csv("/assets/data/data.csv").then(function(stateData) {
-// Format the data
-    stateData.forEach(function(data) {
-        data.poverty = +data.poverty;
-        data.healthcare = +data.healthcare;
-  });
+// Initial paramaters
+var xproperty = "poverty";
+var yproperty = "healthcare";
+
+// Update xscale
+function xscale(data, xproperty) {
+    // Create scales
+    var xLinearScale = d3.scaleLinear()
+        .domain([d3.min(data, d => d[xproperty]) * 0.8,
+        d3.max(data, d => d[xproperty]) * 1.2
+        ])
+        .range([0, width]);
+    return xLinearScale;
+}
+
+// Udate xscale upon clicking axis label
+function yscale(data, yproperty) {
+    // Create scales
+    var yLinearScale = d3.scaleLinear()
+        .domain([d3.min(data, d => d[yproperty]) * 0.8,
+        d3.max(data, d => d[yproperty]) * 1.1
+        ])
+        .range([height, 0]);
+    return yLinearScale;
+}
+
+// Update xaxis upon clicking axis label
+function renderxaxis(newXscale, xaxis) {
+    var bottomAxis = d3.axisBottom(newXscale);
+    xaxis.transition()
+        .duration(1000)
+        .call(bottomAxis);
+    return xaxis;
+}
+
+// Update xaxis upon clicking y axis label
+
+function renderyaxis(newYscale, yaxis) {
+    var leftAxis = d3.axisLeft(newYscale);
+    yaxis.transition()
+        .duration(500)
+        .call(leftAxis);
+    return yaxis;
+}
+
+// Import data from data.csv & format
+d3.csv("/assets/data/data.csv").then(function(data) {
+    data.forEach(d => {
+        d.poverty = +d.poverty;
+        d.healthcare = +d.healthcare;
+        d.age = +d.age;
+        d.income = +d.income;
+        d.obese = + d.obese;
+        d.smokes = +d.smokes
+});
+
 
 // Create scaling functions   
     var xLinearScale = d3.scaleLinear()
@@ -94,15 +139,15 @@ d3.csv("/assets/data/data.csv").then(function(stateData) {
             return (`${d.state}<br>Population In Poverty (%): ${d.poverty}<br>Lacks Healthcare (%): ${d.healthcare}`)
         });      
 
-// tooltip in the chart
+// tooltip in chart
     chartGroup.call(toolTip);   
     
-// Add an onmouseover event to display a tooltip   
+// Add onmouseover event to display tooltip   
     circlesGroup.on("mouseover", function(data) {
         toolTip.show(data, this);
     })
 
-    // Add an on mouseout    
+    // Add mouseout    
     .on("mouseout", function(data, index) {
         toolTip.hide(data);
     });
